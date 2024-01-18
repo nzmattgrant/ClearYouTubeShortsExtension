@@ -1,8 +1,11 @@
+console.log("Clear YouTube Shorts Extension loaded");
+
 // Function to inject a button after each section
 const awaitTimeout = delay =>
   new Promise(resolve => setTimeout(resolve, delay));
 
 function injectButton() {
+    console.log("Injecting button");
     const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
     sections.forEach((section) => {
         const nextElement = section.nextElementSibling;

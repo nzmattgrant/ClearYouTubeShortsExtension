@@ -59,4 +59,6 @@ async function handleClick(event) {
 // Event listener to handle newly loaded sections
 window.addEventListener('scroll', injectButton);
 
-injectButton(); // Inject button for the first time
+setTimeout(() => {
+    injectButton();
+}, 500); // Inject button after 0.5 seconds

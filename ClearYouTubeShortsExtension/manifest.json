@@ -15,7 +15,7 @@
     {
       "matches": ["*://www.youtube.com/feed/history*"],
       "js": ["content.js"],
-      "run_at": "document_end"
+      "run_at": "document_idle"
     }
   ]
 }

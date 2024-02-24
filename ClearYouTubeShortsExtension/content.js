@@ -38,17 +38,28 @@ async function handleClick(event) {
         });
 
         for (const item of notDismissed) {
-            item.querySelector('ytd-menu-renderer yt-icon-button button').click();
-            await awaitTimeout(500);
+            if (!item) {
+                continue;
+            }
+            let button = item.querySelector('ytd-menu-renderer yt-icon-button button');
+            let count = 0;
+            while (!button && count < 10) {
+                item.scrollIntoView();
+                await awaitTimeout(100);
+                button = item.querySelector('ytd-menu-renderer yt-icon-button button');
+                count++;
+            }
+            button.click();
+            await awaitTimeout(100);
             Array.from(document.querySelectorAll('yt-formatted-string')).find(e => e.textContent === "Remove from watch history").click();
-            await awaitTimeout(500);
+            await awaitTimeout(100);
         }
         const nextButtonShape = closestShelfRenderer.querySelector('#right-arrow yt-button-shape');
         if (nextButtonShape) {
             const firstButton = nextButtonShape.querySelector('button');
             if (firstButton) {
                 firstButton.click();
-                await awaitTimeout(500);
+                await awaitTimeout(100);
                 clearRowSegment();
             }
         }
@@ -61,4 +72,4 @@ window.addEventListener('scroll', injectButton);
 
 setTimeout(() => {
     injectButton();
-}, 500); // Inject button after 0.5 seconds
+}, 5000); // Inject button after 1 second

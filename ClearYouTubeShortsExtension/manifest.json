@@ -4,9 +4,9 @@
   "version": "1.0",
   "description": "Adds buttons into YouTube history page to clear short rows",
   "icons": {
-    "128": "DeleteReelsIcon128.png",
-    "48": "DeleteReelsIcon48.png",
-    "16": "DeleteReelsIcon16.png"
+    "128": "DeleteShortsIcon128.png",
+    "48": "DeleteShortsIcon48.png",
+    "16": "DeleteShortsIcon16.png"
   },
   "permissions": [
     "tabs"

@@ -1,11 +1,8 @@
-console.log("Clear YouTube Shorts Extension loaded");
-
 // Function to inject a button after each section
 const awaitTimeout = delay =>
   new Promise(resolve => setTimeout(resolve, delay));
 
 function injectButton() {
-    console.log("Injecting button");
     const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
     sections.forEach((section) => {
         const nextElement = section.nextElementSibling;
@@ -45,21 +42,21 @@ async function handleClick(event) {
             let count = 0;
             while (!button && count < 10) {
                 item.scrollIntoView();
-                await awaitTimeout(100);
+                await awaitTimeout(10);
                 button = item.querySelector('ytd-menu-renderer yt-icon-button button');
                 count++;
             }
             button.click();
-            await awaitTimeout(100);
+            await awaitTimeout(10);
             Array.from(document.querySelectorAll('yt-formatted-string')).find(e => e.textContent === "Remove from watch history").click();
-            await awaitTimeout(100);
+            await awaitTimeout(10);
         }
         const nextButtonShape = closestShelfRenderer.querySelector('#right-arrow yt-button-shape');
         if (nextButtonShape) {
             const firstButton = nextButtonShape.querySelector('button');
             if (firstButton) {
                 firstButton.click();
-                await awaitTimeout(100);
+                await awaitTimeout(10);
                 clearRowSegment();
             }
         }
@@ -70,6 +67,12 @@ async function handleClick(event) {
 // Event listener to handle newly loaded sections
 window.addEventListener('scroll', injectButton);
 
-setTimeout(() => {
-    injectButton();
-}, 5000); // Inject button after 1 second
+const intervalId = setInterval(() => {
+    const buttons = document.querySelectorAll('button');
+    const clearButton = Array.from(buttons).find(button => button.textContent === 'Clear row');
+    if (clearButton) {
+        clearInterval(intervalId);
+    } else {
+        injectButton();
+    }
+}, 1000);

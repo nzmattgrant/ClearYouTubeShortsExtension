@@ -8,9 +8,6 @@
     "48": "DeleteShortsIcon48.png",
     "16": "DeleteShortsIcon16.png"
   },
-  "permissions": [
-    "tabs"
-  ],
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/feed/history*"],

@@ -42,12 +42,12 @@ async function handleClick(event) {
             let count = 0;
             while (!button && count < 10) {
                 item.scrollIntoView();
-                await awaitTimeout(10);
+                await awaitTimeout(100);
                 button = item.querySelector('ytd-menu-renderer yt-icon-button button');
                 count++;
             }
             button.click();
-            await awaitTimeout(10);
+            await awaitTimeout(100);
             Array.from(document.querySelectorAll('yt-formatted-string')).find(e => e.textContent === "Remove from watch history").click();
             await awaitTimeout(10);
         }
@@ -56,16 +56,13 @@ async function handleClick(event) {
             const firstButton = nextButtonShape.querySelector('button');
             if (firstButton) {
                 firstButton.click();
-                await awaitTimeout(10);
+                await awaitTimeout(100);
                 clearRowSegment();
             }
         }
     }
     clearRowSegment();
 }
-
-// Event listener to handle newly loaded sections
-window.addEventListener('scroll', injectButton);
 
 const intervalId = setInterval(() => {
     const buttons = document.querySelectorAll('button');
@@ -76,3 +73,6 @@ const intervalId = setInterval(() => {
         injectButton();
     }
 }, 1000);
+
+// Event listener to handle newly loaded sections
+window.addEventListener('scroll', injectButton);

@@ -1,18 +1,26 @@
 // Function to inject a button after each section
 const awaitTimeout = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
+function addButtonIntoSection(section) {
+  console.log('Injecting button in section');
+  const nextElement = section.nextElementSibling;
+  if (nextElement && nextElement.tagName === 'BUTTON' && nextElement.textContent.trim() === 'Clear row') {
+    console.log('Button already exists or no next element found');
+    return; // Skip if the next element is already a button with "Clear row" text
+  }
+  const button = document.createElement('button');
+  button.textContent = 'Clear row';
+  console.log('Button created after section', section.nextSibling);
+  section.parentNode.insertBefore(button, section.nextSibling);
+
+  button.addEventListener('click', handleClick); // Add click event listener to the button
+}
+
 function injectButton() {
   const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
+  if (sections.length === 0) console.log('No sections found');
   sections.forEach((section) => {
-    const nextElement = section.nextElementSibling;
-    if (nextElement && nextElement.tagName === 'BUTTON' && nextElement.textContent.trim() === 'Clear row') {
-      return; // Skip if the next element is already a button with "Clear row" text
-    }
-    const button = document.createElement('button');
-    button.textContent = 'Clear row';
-    section.parentNode.insertBefore(button, section.nextSibling);
-
-    button.addEventListener('click', handleClick); // Add click event listener to the button
+    addButtonIntoSection(section);
   });
 }
 
@@ -67,20 +75,27 @@ async function handleClick(event) {
   clearRowSegment();
 }
 
-// Function to run your extension logic
 function runExtension() {
+  console.log('Running extension');
   const intervalId = setInterval(() => {
-    const buttons = document.querySelectorAll('button');
-    const clearButton = Array.from(buttons).find((button) => button.textContent === 'Clear row');
-    if (clearButton) {
-      clearInterval(intervalId);
-    } else {
+    let anySectionsMissingButton = false;
+    const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
+    for (const section of sections) {
+      const buttons = section.querySelectorAll('button');
+      const clearButton = Array.from(buttons).find((button) => button.textContent === 'Clear row');
+      if (!clearButton) {
+        anySectionsMissingButton = true;
+        break;
+      }
+    }
+    if (anySectionsMissingButton) {
+      console.log('Injecting button button does not exist yet');
       injectButton();
+    } else {
+      console.log('Clear button already exists');
+      clearInterval(intervalId);
     }
   }, 1000);
-
-  // Event listener to handle newly loaded sections
-  window.addEventListener('scroll', injectButton);
 }
 
 let lastUrl = location.href;
@@ -93,9 +108,14 @@ if (lastUrl.includes(historyUrl)) {
 // Listen for URL changes
 new MutationObserver(() => {
   const url = location.href;
-  console.log('something changed', url, lastUrl);
-  if (url !== lastUrl && url.includes(historyUrl)) {
+  if (url !== lastUrl) {
+    console.log('urls changed', url, lastUrl);
     lastUrl = url;
-    runExtension();
+    if (url.includes(historyUrl)) {
+      runExtension();
+    }
   }
 }).observe(document, { subtree: true, childList: true });
+
+// Event listener to handle newly loaded sections
+window.addEventListener('scroll', injectButton, { passive: true });

@@ -1,1 +1,2 @@
 Clear youtube shorts from the youtube history page by row. A bit manual and slow but at least you don't have to click through each one or find all the shorts in the activity history.
+Published here: https://chromewebstore.google.com/detail/delete-youtube-shorts-fro/ofblaconiohlgkhkpihnhfcjcnmgjmfi

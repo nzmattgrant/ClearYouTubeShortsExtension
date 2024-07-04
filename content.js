@@ -2,15 +2,12 @@
 const awaitTimeout = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
 function addButtonIntoSection(section) {
-  console.log('Injecting button in section');
   const nextElement = section.nextElementSibling;
   if (nextElement && nextElement.tagName === 'BUTTON' && nextElement.textContent.trim() === 'Clear row') {
-    console.log('Button already exists or no next element found');
     return; // Skip if the next element is already a button with "Clear row" text
   }
   const button = document.createElement('button');
   button.textContent = 'Clear row';
-  console.log('Button created after section', section.nextSibling);
   section.parentNode.insertBefore(button, section.nextSibling);
 
   button.addEventListener('click', handleClick); // Add click event listener to the button
@@ -18,9 +15,23 @@ function addButtonIntoSection(section) {
 
 function injectButton() {
   const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
-  if (sections.length === 0) console.log('No sections found');
   sections.forEach((section) => {
     addButtonIntoSection(section);
+    // const intervalId = setInterval(() => {
+    //   console.log('Checking if section is loaded');
+    //   let isLoaded = false;
+    //   const notDismissedItems = Array.from(section.querySelectorAll('ytd-reel-item-renderer:not([is-dismissed]) #dismissible'));
+    //   console.log('Checking not dismissed', notDismissedItems);
+    //   notDismissedItems.forEach((item) => {
+    //     console.log('Checking if item is loaded inside section');
+    //     const dropdown = item.querySelector('ytd-menu-renderer yt-icon-button button');
+    //     isLoaded = isLoaded || !!dropdown;
+    //   });
+    //   if (isLoaded) {
+        
+    //     clearInterval(intervalId);
+    //   }
+    // }, 1000);
   });
 }
 
@@ -89,10 +100,8 @@ function runExtension() {
       }
     }
     if (anySectionsMissingButton) {
-      console.log('Injecting button button does not exist yet');
       injectButton();
     } else {
-      console.log('Clear button already exists');
       clearInterval(intervalId);
     }
   }, 1000);

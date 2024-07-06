@@ -1,11 +1,28 @@
 // Function to inject a button after each section
 const awaitTimeout = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
-function addButtonIntoSection(section) {
+function anyButtonsOnSection(section) {
   const nextElement = section.nextElementSibling;
-  if (nextElement && nextElement.tagName === 'BUTTON' && nextElement.textContent.trim() === 'Clear row') {
-    return; // Skip if the next element is already a button with "Clear row" text
+  return nextElement && nextElement.tagName === 'BUTTON' && nextElement.textContent.trim() === 'Clear row';
+}
+
+function anyDropDownButtonsLoaded() {
+  return (
+    Array.from(
+      document.querySelectorAll(
+        'ytd-reel-item-renderer:not([is-dismissed]) #dismissible ytd-menu-renderer yt-icon-button button'
+      )
+    ).length > 0
+  );
+}
+
+function addButtonIntoSection(section) {
+  if (anyButtonsOnSection(section)) {
+    return;
   }
+  section.parentNode
+    .querySelectorAll('.button-placeholder-clear-youtube-history')
+    .forEach((element) => element.remove());
   const button = document.createElement('button');
   button.textContent = 'Clear row';
   section.parentNode.insertBefore(button, section.nextSibling);
@@ -13,26 +30,39 @@ function addButtonIntoSection(section) {
   button.addEventListener('click', handleClick); // Add click event listener to the button
 }
 
+function addButtonPlaceholderIntoSection(section) {
+  if (anyButtonsOnSection(section)) {
+    return;
+  }
+  section.parentNode
+    .querySelectorAll('.button-placeholder-clear-youtube-history')
+    .forEach((element) => element.remove());
+  const button = document.createElement('div');
+  button.textContent = 'Waiting for UI to load...';
+  button.classList.add('button-placeholder-clear-youtube-history');
+  section.parentNode.insertBefore(button, section.nextSibling);
+}
+
 function injectButton() {
   const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
-  sections.forEach((section) => {
-    addButtonIntoSection(section);
-    // const intervalId = setInterval(() => {
-    //   console.log('Checking if section is loaded');
-    //   let isLoaded = false;
-    //   const notDismissedItems = Array.from(section.querySelectorAll('ytd-reel-item-renderer:not([is-dismissed]) #dismissible'));
-    //   console.log('Checking not dismissed', notDismissedItems);
-    //   notDismissedItems.forEach((item) => {
-    //     console.log('Checking if item is loaded inside section');
-    //     const dropdown = item.querySelector('ytd-menu-renderer yt-icon-button button');
-    //     isLoaded = isLoaded || !!dropdown;
-    //   });
-    //   if (isLoaded) {
-        
-    //     clearInterval(intervalId);
-    //   }
-    // }, 1000);
-  });
+  //dropdowns are loaded
+  if (anyDropDownButtonsLoaded()) {
+    sections.forEach(addButtonIntoSection);
+    return;
+  }
+  sections.forEach(addButtonPlaceholderIntoSection);
+  let timeoutCount = 0;
+  const recursiveTimeout = () => {
+    timeoutCount++;
+    if (anyDropDownButtonsLoaded()) {
+      sections.forEach(addButtonIntoSection);
+      return;
+    }
+    if (timeoutCount < 120) {
+      setTimeout(recursiveTimeout, 1000);
+    }
+  };
+  setTimeout(recursiveTimeout, 1000);
 }
 
 // Function to handle button click

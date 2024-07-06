@@ -141,7 +141,7 @@ let lastUrl = location.href;
 const historyUrl = 'youtube.com/feed/history';
 // Run the extension when the page loads
 if (lastUrl.includes(historyUrl)) {
-  runExtension();
+  setTimeout(runExtension, 1000);
 }
 
 // Listen for URL changes

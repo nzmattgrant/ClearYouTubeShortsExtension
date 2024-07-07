@@ -1,3 +1,5 @@
+const historyUrl = 'youtube.com/feed/history';
+
 // Function to inject a button after each section
 const awaitTimeout = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -44,6 +46,9 @@ function addButtonPlaceholderIntoSection(section) {
 }
 
 function injectButton() {
+  if(!location.href.includes(historyUrl)) {
+    return;
+  }
   const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
   //dropdowns are loaded
   if (anyDropDownButtonsLoaded()) {
@@ -117,7 +122,6 @@ async function handleClick(event) {
 }
 
 function runExtension() {
-  console.log('Running extension');
   const intervalId = setInterval(() => {
     let anySectionsMissingButton = false;
     const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
@@ -138,7 +142,6 @@ function runExtension() {
 }
 
 let lastUrl = location.href;
-const historyUrl = 'youtube.com/feed/history';
 // Run the extension when the page loads
 if (lastUrl.includes(historyUrl)) {
   setTimeout(runExtension, 1000);
@@ -148,7 +151,6 @@ if (lastUrl.includes(historyUrl)) {
 new MutationObserver(() => {
   const url = location.href;
   if (url !== lastUrl) {
-    console.log('urls changed', url, lastUrl);
     lastUrl = url;
     if (url.includes(historyUrl)) {
       runExtension();

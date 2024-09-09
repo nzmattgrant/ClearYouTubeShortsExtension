@@ -1,4 +1,14 @@
 const historyUrl = 'youtube.com/feed/history';
+const shelfRowElementName = 'ytd-reel-shelf-renderer';
+const dropDownButtonClassSelector = "ytm-shorts-lockup-view-model .yt-spec-button-shape-next";
+const horizontalListRendererElementName = "yt-horizontal-list-renderer";
+const buttonPlaceholderClass= 'button-placeholder-clear-youtube-history';
+const buttonPlaceholderClassSelector = '.' + buttonPlaceholderClass;
+const shelfRowHeaderSelector = 'h2.style-scope.' + shelfRowElementName;
+const notDismissedRowSelector = horizontalListRendererElementName + ':not([is-dismissed]) ';
+const allDropDownButtonsSelector = notDismissedRowSelector + dropDownButtonClassSelector;
+const removeButtonSelector = '.yt-core-attributed-string';
+
 
 // Function to inject a button after each section
 const awaitTimeout = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
@@ -11,9 +21,7 @@ function anyButtonsOnSection(section) {
 function anyDropDownButtonsLoaded() {
   return (
     Array.from(
-      document.querySelectorAll(
-        'ytd-reel-item-renderer:not([is-dismissed]) #dismissible ytd-menu-renderer yt-icon-button button'
-      )
+      document.querySelectorAll(allDropDownButtonsSelector)
     ).length > 0
   );
 }
@@ -23,7 +31,7 @@ function addButtonIntoSection(section) {
     return;
   }
   section.parentNode
-    .querySelectorAll('.button-placeholder-clear-youtube-history')
+    .querySelectorAll(buttonPlaceholderClassSelector)
     .forEach((element) => element.remove());
   const button = document.createElement('button');
   button.textContent = 'Clear row';
@@ -37,11 +45,11 @@ function addButtonPlaceholderIntoSection(section) {
     return;
   }
   section.parentNode
-    .querySelectorAll('.button-placeholder-clear-youtube-history')
+    .querySelectorAll(buttonPlaceholderClassSelector)
     .forEach((element) => element.remove());
   const button = document.createElement('div');
   button.textContent = 'Waiting for UI to load...';
-  button.classList.add('button-placeholder-clear-youtube-history');
+  button.classList.add(buttonPlaceholderClass);
   section.parentNode.insertBefore(button, section.nextSibling);
 }
 
@@ -49,7 +57,7 @@ function injectButton() {
   if(!location.href.includes(historyUrl)) {
     return;
   }
-  const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
+  const sections = document.querySelectorAll(shelfRowHeaderSelector);
   //dropdowns are loaded
   if (anyDropDownButtonsLoaded()) {
     sections.forEach(addButtonIntoSection);
@@ -74,16 +82,16 @@ function injectButton() {
 async function handleClick(event) {
   const clickedElement = event.target;
   const clearRowSegment = async () => {
-    const closestShelfRenderer = clickedElement.closest('ytd-reel-shelf-renderer');
+    const closestShelfRenderer = clickedElement.closest(shelfRowElementName);
     var notDismissed = Array.from(
-      closestShelfRenderer.querySelectorAll('ytd-reel-item-renderer:not([is-dismissed]) #dismissible')
+      closestShelfRenderer.querySelectorAll(notDismissedRowSelector)
     );
     if (notDismissed.length == 0) {
       return;
     }
 
     notDismissed = notDismissed.filter((item) => {
-      const horizontalListRenderer = item.closest('yt-horizontal-list-renderer');
+      const horizontalListRenderer = item.closest(shelfRowElementName);
       const itemRect = item.getBoundingClientRect();
       const horizontalListRendererRect = horizontalListRenderer.getBoundingClientRect();
       return itemRect.left < horizontalListRendererRect.right;
@@ -93,20 +101,21 @@ async function handleClick(event) {
       if (!item) {
         continue;
       }
-      let button = item.querySelector('ytd-menu-renderer yt-icon-button button');
+      let button = item.querySelector(dropDownButtonClassSelector);
       let count = 0;
       while (!button && count < 10) {
-        item.scrollIntoView();
+        item.scrollIntoViewIfNeeded();
         await awaitTimeout(100);
-        button = item.querySelector('ytd-menu-renderer yt-icon-button button');
+        button = item.querySelector(dropDownButtonClassSelector);
         count++;
       }
       button.click();
       await awaitTimeout(100);
-      Array.from(document.querySelectorAll('yt-formatted-string'))
+      Array.from(document.querySelectorAll(removeButtonSelector))
         .find((e) => e.textContent === 'Remove from watch history')
         .click();
       await awaitTimeout(10);
+      button.closest('ytm-shorts-lockup-view-model-v2').remove();
     }
     const nextButtonShape = closestShelfRenderer.querySelector('#right-arrow yt-button-shape');
     if (nextButtonShape) {
@@ -124,7 +133,7 @@ async function handleClick(event) {
 function runExtension() {
   const intervalId = setInterval(() => {
     let anySectionsMissingButton = false;
-    const sections = document.querySelectorAll('h2.style-scope.ytd-reel-shelf-renderer');
+    const sections = document.querySelectorAll(shelfRowHeaderSelector);
     for (const section of sections) {
       const buttons = section.querySelectorAll('button');
       const clearButton = Array.from(buttons).find((button) => button.textContent === 'Clear row');

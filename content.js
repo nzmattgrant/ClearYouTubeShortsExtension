@@ -1,6 +1,7 @@
 const historyUrl = 'youtube.com/feed/history';
 const shelfRowElementName = 'ytd-reel-shelf-renderer';
 const dropDownButtonClassSelector = "ytm-shorts-lockup-view-model .yt-spec-button-shape-next";
+const dropDownButtonImageClassSelector = dropDownButtonClassSelector + ' yt-icon .yt-icon-shape svg';
 const horizontalListRendererElementName = "yt-horizontal-list-renderer";
 const buttonPlaceholderClass= 'button-placeholder-clear-youtube-history';
 const buttonPlaceholderClassSelector = '.' + buttonPlaceholderClass;
@@ -21,7 +22,7 @@ function anyButtonsOnSection(section) {
 function anyDropDownButtonsLoaded() {
   return (
     Array.from(
-      document.querySelectorAll(allDropDownButtonsSelector)
+      document.querySelectorAll(dropDownButtonImageClassSelector)
     ).length > 0
   );
 }

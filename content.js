@@ -1,13 +1,13 @@
 const historyUrl = 'youtube.com/feed/history';
-const shelfRowElementName = 'ytd-reel-shelf-renderer';
-const dropDownButtonClassSelector = "ytm-shorts-lockup-view-model .yt-spec-button-shape-next";
-const dropDownButtonImageClassSelector = dropDownButtonClassSelector + ' yt-icon .yt-icon-shape svg';
-const horizontalListRendererElementName = "yt-horizontal-list-renderer";
+const rowContainerElementName = 'ytd-reel-shelf-renderer';
+const rowElementName = "yt-horizontal-list-renderer";
+const rowItemElementName = 'ytm-shorts-lockup-view-model';
+const dropDownButtonClassSelector = `${rowItemElementName} .yt-spec-button-shape-next`;
+const dropDownButtonImageClassSelector = `${dropDownButtonClassSelector} yt-icon .yt-icon-shape svg`;
 const buttonPlaceholderClass= 'button-placeholder-clear-youtube-history';
 const buttonPlaceholderClassSelector = '.' + buttonPlaceholderClass;
-const shelfRowHeaderSelector = 'h2.style-scope.' + shelfRowElementName;
-const notDismissedRowSelector = horizontalListRendererElementName + ':not([is-dismissed]) ';
-const allDropDownButtonsSelector = notDismissedRowSelector + dropDownButtonClassSelector;
+const shelfRowHeaderSelector = 'h2.style-scope.' + rowContainerElementName;
+const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelector}`;
 const removeButtonSelector = '.yt-core-attributed-string';
 
 
@@ -79,26 +79,27 @@ function injectButton() {
   setTimeout(recursiveTimeout, 1000);
 }
 
-// Function to handle button click
 async function handleClick(event) {
   const clickedElement = event.target;
   const clearRowSegment = async () => {
-    const closestShelfRenderer = clickedElement.closest(shelfRowElementName);
-    var notDismissed = Array.from(
-      closestShelfRenderer.querySelectorAll(notDismissedRowSelector)
+    const closestRowContainer = clickedElement.closest(rowContainerElementName);
+    var rowItems = Array.from(
+      closestRowContainer.querySelectorAll(rowItemElementName)
     );
-    if (notDismissed.length == 0) {
+    if (rowItems.length == 0) {
       return;
     }
-
-    notDismissed = notDismissed.filter((item) => {
-      const horizontalListRenderer = item.closest(shelfRowElementName);
+      
+    const visibleItemFilter = (item) => {
+      const rowContainer = item.closest(rowContainerElementName);
       const itemRect = item.getBoundingClientRect();
-      const horizontalListRendererRect = horizontalListRenderer.getBoundingClientRect();
-      return itemRect.left < horizontalListRendererRect.right;
-    });
+      const rowContainerRendererRect = rowContainer.getBoundingClientRect();
+      return itemRect.left < rowContainerRendererRect.right;
+    };
 
-    for (const item of notDismissed) {
+    rowItems = rowItems.filter(visibleItemFilter);
+
+    for (const item of rowItems) {
       if (!item) {
         continue;
       }
@@ -118,8 +119,13 @@ async function handleClick(event) {
       await awaitTimeout(10);
       button.closest('ytm-shorts-lockup-view-model-v2').remove();
     }
-    const nextButtonShape = closestShelfRenderer.querySelector('#right-arrow yt-button-shape');
+    const nextButtonShape = closestRowContainer.querySelector('#right-arrow yt-button-shape');
     if (nextButtonShape) {
+      const stillVisibleRowElements = closestRowContainer.querySelectorAll(rowItemElementName).filter(visibleItemFilter);
+      if(stillVisibleRowElements.length > 0) {
+        clearRowSegment();
+        return;
+      }
       const firstButton = nextButtonShape.querySelector('button');
       if (firstButton) {
         firstButton.click();

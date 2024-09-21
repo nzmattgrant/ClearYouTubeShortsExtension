@@ -2,6 +2,7 @@ const historyUrl = 'youtube.com/feed/history';
 const rowContainerElementName = 'ytd-reel-shelf-renderer';
 const rowElementName = "yt-horizontal-list-renderer";
 const rowItemElementName = 'ytm-shorts-lockup-view-model';
+const notDismissedRowItemSelector = `${rowItemElementName}:not(.dismissed)`;
 const dropDownButtonClassSelector = `${rowItemElementName} .yt-spec-button-shape-next`;
 const dropDownButtonImageClassSelector = `${dropDownButtonClassSelector} yt-icon .yt-icon-shape svg`;
 const buttonPlaceholderClass= 'button-placeholder-clear-youtube-history';
@@ -10,6 +11,34 @@ const shelfRowHeaderSelector = 'h2.style-scope.' + rowContainerElementName;
 const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelector}`;
 const removeButtonSelector = '.yt-core-attributed-string';
 
+
+function createDeletedOverlay(targetElement) {
+  // Create the overlay div
+  const overlay = document.createElement('div');
+  
+  // Style the overlay
+  overlay.style.position = 'absolute';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+  overlay.style.display = 'flex';
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.style.fontSize = '24px';
+  overlay.style.fontWeight = 'bold';
+  overlay.style.color = 'black';
+  
+  // Set the text content
+  overlay.textContent = 'DELETED';
+  
+  // Make sure the target element has position: relative
+  targetElement.style.position = 'relative';
+  
+  // Append the overlay to the target element
+  targetElement.appendChild(overlay);
+}
 
 // Function to inject a button after each section
 const awaitTimeout = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
@@ -84,7 +113,7 @@ async function handleClick(event) {
   const clearRowSegment = async () => {
     const closestRowContainer = clickedElement.closest(rowContainerElementName);
     var rowItems = Array.from(
-      closestRowContainer.querySelectorAll(rowItemElementName)
+      closestRowContainer.querySelectorAll(notDismissedRowItemSelector)
     );
     if (rowItems.length == 0) {
       return;
@@ -117,15 +146,16 @@ async function handleClick(event) {
         .find((e) => e.textContent === 'Remove from watch history')
         .click();
       await awaitTimeout(10);
-      button.closest('ytm-shorts-lockup-view-model-v2').remove();
+      item.classList.add('dismissed');
+      createDeletedOverlay(item);
     }
     const nextButtonShape = closestRowContainer.querySelector('#right-arrow yt-button-shape');
     if (nextButtonShape) {
-      const stillVisibleRowElements = closestRowContainer.querySelectorAll(rowItemElementName).filter(visibleItemFilter);
-      if(stillVisibleRowElements.length > 0) {
-        clearRowSegment();
-        return;
-      }
+      // const stillVisibleRowElements = closestRowContainer.querySelectorAll(rowItemElementName).filter(visibleItemFilter);
+      // if(stillVisibleRowElements.length > 0) {
+      //   clearRowSegment();
+      //   return;
+      // }
       const firstButton = nextButtonShape.querySelector('button');
       if (firstButton) {
         firstButton.click();

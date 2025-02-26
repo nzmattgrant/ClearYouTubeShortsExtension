@@ -116,6 +116,7 @@ async function handleClick(event) {
       closestRowContainer.querySelectorAll(notDismissedRowItemSelector)
     );
     if (rowItems.length == 0) {
+      closestRowContainer.remove();
       return;
     }
       

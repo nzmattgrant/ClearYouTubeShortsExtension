@@ -65,6 +65,19 @@ function addButtonIntoSection(section) {
     .forEach((element) => element.remove());
   const button = document.createElement('button');
   button.textContent = 'Clear row';
+  button.style.background = '#ff4d4f';
+  button.style.color = '#fff';
+  button.style.border = 'none';
+  button.style.borderRadius = '4px';
+  button.style.padding = '8px 16px';
+  button.style.margin = '8px 0';
+  button.style.cursor = 'pointer';
+  button.style.fontWeight = 'bold';
+  button.style.fontSize = '14px';
+  button.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
+  button.style.transition = 'background 0.2s';
+  button.onmouseover = () => button.style.background = '#d9363e';
+  button.onmouseout = () => button.style.background = '#ff4d4f';
   section.parentNode.insertBefore(button, section.nextSibling);
 
   button.addEventListener('click', handleClick); // Add click event listener to the button

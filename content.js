@@ -12,6 +12,9 @@ const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelec
 const removeButtonSelector = '.yt-core-attributed-string';
 
 
+function deleteAll() {
+}
+
 function waitForActionsRenderer() {
   const checkInterval = setInterval(() => {
     const actionsRenderer = document.querySelector('ytd-browse-feed-actions-renderer');
@@ -24,7 +27,7 @@ function waitForActionsRenderer() {
 
 function insertDeleteAllButton(actionsRenderer) {
   const deleteAllButton = document.createElement('button');
-  deleteAllButton.textContent = 'Delete All';
+  deleteAllButton.textContent = 'Delete All YouTube Shorts';
   deleteAllButton.style.background = '#ff4d4f';
   deleteAllButton.style.color = '#fff';
   deleteAllButton.style.border = 'none';
@@ -40,7 +43,7 @@ function insertDeleteAllButton(actionsRenderer) {
   deleteAllButton.onmouseout = () => deleteAllButton.style.background = '#ff4d4f';
   deleteAllButton.addEventListener('click', deleteAll);
 
-  actionsRenderer.parentNode.insertAfter(deleteAllButton, actionsRenderer);
+  actionsRenderer.appendChild(deleteAllButton);
 }
 
 waitForActionsRenderer();

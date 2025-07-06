@@ -12,6 +12,39 @@ const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelec
 const removeButtonSelector = '.yt-core-attributed-string';
 
 
+function waitForActionsRenderer() {
+  const checkInterval = setInterval(() => {
+    const actionsRenderer = document.querySelector('ytd-browse-feed-actions-renderer');
+    if (actionsRenderer) {
+      clearInterval(checkInterval);
+      insertDeleteAllButton(actionsRenderer);
+    }
+  }, 500);
+}
+
+function insertDeleteAllButton(actionsRenderer) {
+  const deleteAllButton = document.createElement('button');
+  deleteAllButton.textContent = 'Delete All';
+  deleteAllButton.style.background = '#ff4d4f';
+  deleteAllButton.style.color = '#fff';
+  deleteAllButton.style.border = 'none';
+  deleteAllButton.style.borderRadius = '4px';
+  deleteAllButton.style.padding = '8px 16px';
+  deleteAllButton.style.margin = '8px 0';
+  deleteAllButton.style.cursor = 'pointer';
+  deleteAllButton.style.fontWeight = 'bold';
+  deleteAllButton.style.fontSize = '14px';
+  deleteAllButton.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
+  deleteAllButton.style.transition = 'background 0.2s';
+  deleteAllButton.onmouseover = () => deleteAllButton.style.background = '#d9363e';
+  deleteAllButton.onmouseout = () => deleteAllButton.style.background = '#ff4d4f';
+  deleteAllButton.addEventListener('click', deleteAll);
+
+  actionsRenderer.parentNode.insertAfter(deleteAllButton, actionsRenderer);
+}
+
+waitForActionsRenderer();
+
 function createDeletedOverlay(targetElement) {
   // Create the overlay div
   const overlay = document.createElement('div');

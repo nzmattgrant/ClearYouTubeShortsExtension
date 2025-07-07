@@ -13,6 +13,29 @@ const removeButtonSelector = '.yt-core-attributed-string';
 
 
 function deleteAll() {
+  const scrollAndClearShorts = async () => {
+    const scrollInterval = setInterval(async () => {
+      const rowContainer = document.querySelector(rowContainerElementName);
+      if (rowContainer) {
+        const clearRowButton = rowContainer.querySelector('button');
+        if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
+          clearRowButton.click();
+          await awaitTimeout(1000); // Wait for the row to be cleared
+        }
+      }
+
+      // Scroll the page down
+      window.scrollBy(0, window.innerHeight);
+
+      // Check if we can't scroll anymore
+      const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight;
+      if (atBottom) {
+        clearInterval(scrollInterval);
+      }
+    }, 1000);
+  };
+
+  scrollAndClearShorts();
 }
 
 function waitForActionsRenderer() {

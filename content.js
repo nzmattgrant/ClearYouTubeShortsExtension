@@ -28,9 +28,15 @@ function deleteAll() {
       window.scrollBy(0, window.innerHeight);
 
       // Check if we can't scroll anymore
-      const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight;
+      const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100; // Add a buffer
       if (atBottom) {
-        clearInterval(scrollInterval);
+        const previousHeight = document.body.offsetHeight;
+        await awaitTimeout(1000); // Wait for new content to load
+        const newHeight = document.body.offsetHeight;
+        if (previousHeight === newHeight) { // Check if no new content was loaded
+          console.log('We are at the bottom of the page');
+          clearInterval(scrollInterval);
+        }
       }
     }, 1000);
   };

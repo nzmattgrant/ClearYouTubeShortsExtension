@@ -4,7 +4,7 @@ const rowElementName = "yt-horizontal-list-renderer";
 const rowItemElementName = 'ytm-shorts-lockup-view-model';
 const notDismissedRowItemSelector = `${rowItemElementName}:not(.dismissed)`;
 const dropDownButtonClassSelector = `${rowItemElementName} .yt-spec-button-shape-next`;
-const dropDownButtonImageClassSelector = `${dropDownButtonClassSelector} yt-icon .yt-icon-shape svg`;
+const dropDownButtonImageClassSelector = `${dropDownButtonClassSelector} .yt-icon-shape svg`;
 const buttonPlaceholderClass= 'button-placeholder-clear-youtube-history';
 const buttonPlaceholderClassSelector = '.' + buttonPlaceholderClass;
 const shelfRowHeaderSelector = 'h2.style-scope.' + rowContainerElementName;
@@ -12,70 +12,85 @@ const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelec
 const removeButtonSelector = '.yt-core-attributed-string';
 
 
-function deleteAll() {
-  const scrollAndClearShorts = async () => {
-    const scrollInterval = setInterval(async () => {
-      const rowContainer = document.querySelector(rowContainerElementName);
-      if (rowContainer) {
-        const clearRowButton = rowContainer.querySelector('button');
-        if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
-          clearRowButton.click();
-          await awaitTimeout(1000); // Wait for the row to be cleared
-        }
-      }
+// function deleteAll() {
+//   const scrollAndClearShorts = async () => {
+//     const scrollInterval = setInterval(async () => {
+//       const rowContainer = document.querySelector(rowContainerElementName);
+//       if (rowContainer) {
+//         const clearRowButton = rowContainer.querySelector('button');
+//         if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
+//           clearRowButton.click();
+//           await awaitTimeout(1000); // Wait for the row to be cleared
+//         }
+//       }
 
-      // Scroll the page down
-      window.scrollBy(0, window.innerHeight);
+//       // Scroll the page down
+//       window.scrollBy(0, window.innerHeight);
 
-      // Check if we can't scroll anymore
-      const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100; // Add a buffer
-      if (atBottom) {
-        const previousHeight = document.body.offsetHeight;
-        await awaitTimeout(1000); // Wait for new content to load
-        const newHeight = document.body.offsetHeight;
-        if (previousHeight === newHeight) { // Check if no new content was loaded
-          console.log('We are at the bottom of the page');
-          clearInterval(scrollInterval);
-        }
-      }
-    }, 1000);
-  };
+//       // Check if we can't scroll anymore
+//       const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100; // Add a buffer
+//       if (atBottom) { // Check if we are at the bottom
+//         let noMovementCount = 0;
+//         for (let i = 0; i < 5; i++) { // Try scrolling several times
+//           const previousScrollY = window.scrollY;
+//           window.scrollBy(0, 100); // Attempt to scroll slightly
+//           await awaitTimeout(500); // Wait to see if there's any movement
+//           const newScrollY = window.scrollY;
+//           if (previousScrollY === newScrollY) { // No movement detected
+//         noMovementCount++;
+//           } else {
+//         noMovementCount = 0; // Reset if movement is detected
+//           }
 
-  scrollAndClearShorts();
-}
+//           const spinnerVisible = document.querySelector('tp-yt-paper-spinner-lite[active]') !== null; // Check if spinner is visible
+//           if (noMovementCount >= 3 && !spinnerVisible) { // Confirm no movement and spinner is not visible
+//         console.log('We are at the bottom of the page and spinner is not visible');
+//         clearInterval(scrollInterval);
+//         break;
+//           }
+//         }
 
-function waitForActionsRenderer() {
-  const checkInterval = setInterval(() => {
-    const actionsRenderer = document.querySelector('ytd-browse-feed-actions-renderer');
-    if (actionsRenderer) {
-      clearInterval(checkInterval);
-      insertDeleteAllButton(actionsRenderer);
-    }
-  }, 500);
-}
+//           clearInterval(scrollInterval);
+//         }
+//       }
+//     }, 1000);
+//   };
 
-function insertDeleteAllButton(actionsRenderer) {
-  const deleteAllButton = document.createElement('button');
-  deleteAllButton.textContent = 'Delete All YouTube Shorts';
-  deleteAllButton.style.background = '#ff4d4f';
-  deleteAllButton.style.color = '#fff';
-  deleteAllButton.style.border = 'none';
-  deleteAllButton.style.borderRadius = '4px';
-  deleteAllButton.style.padding = '8px 16px';
-  deleteAllButton.style.margin = '8px 0';
-  deleteAllButton.style.cursor = 'pointer';
-  deleteAllButton.style.fontWeight = 'bold';
-  deleteAllButton.style.fontSize = '14px';
-  deleteAllButton.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
-  deleteAllButton.style.transition = 'background 0.2s';
-  deleteAllButton.onmouseover = () => deleteAllButton.style.background = '#d9363e';
-  deleteAllButton.onmouseout = () => deleteAllButton.style.background = '#ff4d4f';
-  deleteAllButton.addEventListener('click', deleteAll);
+//   scrollAndClearShorts();
+// }
 
-  actionsRenderer.appendChild(deleteAllButton);
-}
+// function waitForActionsRenderer() {
+//   const checkInterval = setInterval(() => {
+//     const actionsRenderer = document.querySelector('ytd-browse-feed-actions-renderer');
+//     if (actionsRenderer) {
+//       clearInterval(checkInterval);
+//       insertDeleteAllButton(actionsRenderer);
+//     }
+//   }, 500);
+// }
 
-waitForActionsRenderer();
+// function insertDeleteAllButton(actionsRenderer) {
+//   const deleteAllButton = document.createElement('button');
+//   deleteAllButton.textContent = 'Delete All YouTube Shorts';
+//   deleteAllButton.style.background = '#ff4d4f';
+//   deleteAllButton.style.color = '#fff';
+//   deleteAllButton.style.border = 'none';
+//   deleteAllButton.style.borderRadius = '4px';
+//   deleteAllButton.style.padding = '8px 16px';
+//   deleteAllButton.style.margin = '8px 0';
+//   deleteAllButton.style.cursor = 'pointer';
+//   deleteAllButton.style.fontWeight = 'bold';
+//   deleteAllButton.style.fontSize = '14px';
+//   deleteAllButton.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
+//   deleteAllButton.style.transition = 'background 0.2s';
+//   deleteAllButton.onmouseover = () => deleteAllButton.style.background = '#d9363e';
+//   deleteAllButton.onmouseout = () => deleteAllButton.style.background = '#ff4d4f';
+//   deleteAllButton.addEventListener('click', deleteAll);
+
+//   actionsRenderer.appendChild(deleteAllButton);
+// }
+
+// waitForActionsRenderer();
 
 function createDeletedOverlay(targetElement) {
   // Create the overlay div

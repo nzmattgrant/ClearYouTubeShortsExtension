@@ -38,6 +38,10 @@ function deleteAll() {
       console.log('Scrolling and checking for new videos...');
 
       const scrolled = window.scrollY !== previousScrollY;
+      if (window.scrollY < previousScrollY) {
+        clearInterval(scrollInterval);
+        return;
+      }
       if (scrolled) {
         // Do nothing if the page scrolled
         previousScrollY = window.scrollY;
@@ -235,12 +239,17 @@ async function handleClick(event) {
       }
       button.click();
       await awaitTimeout(100);
-      Array.from(document.querySelectorAll(removeButtonSelector))
-        .find((e) => e.textContent === 'Remove from watch history')
-        .click();
-      await awaitTimeout(10);
-      item.classList.add('dismissed');
-      createDeletedOverlay(item);
+      const removeButton = Array.from(document.querySelectorAll(removeButtonSelector))
+        .find((e) => e.textContent === 'Remove from watch history');
+      if (removeButton) {
+        removeButton.click();
+        await awaitTimeout(10);
+        item.classList.add('dismissed');
+        createDeletedOverlay(item);
+
+      } else {
+        console.warn('Remove button not found.');
+      }
     }
     const nextButtonShape = closestRowContainer.querySelector('#right-arrow yt-button-shape');
     if (nextButtonShape) {

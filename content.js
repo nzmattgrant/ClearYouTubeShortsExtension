@@ -14,6 +14,9 @@ const removeButtonSelector = '.yt-core-attributed-string';
 
 function deleteAll() {
   const scrollAndClearShorts = async () => {
+    let previousCount = 0;
+    let unchangedIterations = 0;
+    let previousScrollY = window.scrollY;
     const scrollInterval = setInterval(async () => {
       const rowContainer = document.querySelector(rowContainerElementName);
       if (rowContainer) {
@@ -21,8 +24,8 @@ function deleteAll() {
         if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
           clearRowButton.click();
             const startTime = Date.now();
-            while (document.querySelector(rowContainerElementName) && (Date.now() - startTime) < 30000) {
-              await awaitTimeout(500); // Check every 500ms
+            while (document.body.contains(rowContainer) && (Date.now() - startTime) < 30000) {
+              await awaitTimeout(500);
             }
         }
       }
@@ -31,14 +34,22 @@ function deleteAll() {
       window.scrollBy(0, window.innerHeight);
 
       const currentCount = document.querySelectorAll("ytd-video-renderer").length;
+      console.log(`Current count of videos: ${currentCount}`);
+      console.log('Scrolling and checking for new videos...');
 
-      if (currentCount !== previousCount) {
+      const scrolled = window.scrollY !== previousScrollY;
+      if (scrolled) {
+        // Do nothing if the page scrolled
+        previousScrollY = window.scrollY;
+      } else if (currentCount !== previousCount) {
+        // If no scroll but count changed, reset iterations and update counts
         previousCount = currentCount;
-        unchangedIterations = 0; // Reset the counter if the count changes
+        unchangedIterations = 0;
       } else {
+        // If no scroll and no new count, increment iterations
         unchangedIterations++;
-        if (unchangedIterations >= 30) {
-          clearInterval(scrollInterval); // Stop the interval after 60 unchanged iterations
+        if (unchangedIterations >= 10) {
+          clearInterval(scrollInterval);
         }
       }
     }, 1000);
@@ -59,7 +70,7 @@ function waitForActionsRenderer() {
 
 function insertDeleteAllButton(actionsRenderer) {
   const deleteAllButton = document.createElement('button');
-  deleteAllButton.textContent = 'Delete All YouTube Shorts';
+  deleteAllButton.textContent = 'Delete All YouTube Shorts (beta)';
   deleteAllButton.style.background = '#ff4d4f';
   deleteAllButton.style.color = '#fff';
   deleteAllButton.style.border = 'none';

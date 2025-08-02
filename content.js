@@ -12,85 +12,73 @@ const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelec
 const removeButtonSelector = '.yt-core-attributed-string';
 
 
-// function deleteAll() {
-//   const scrollAndClearShorts = async () => {
-//     const scrollInterval = setInterval(async () => {
-//       const rowContainer = document.querySelector(rowContainerElementName);
-//       if (rowContainer) {
-//         const clearRowButton = rowContainer.querySelector('button');
-//         if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
-//           clearRowButton.click();
-//           await awaitTimeout(1000); // Wait for the row to be cleared
-//         }
-//       }
+function deleteAll() {
+  const scrollAndClearShorts = async () => {
+    const scrollInterval = setInterval(async () => {
+      const rowContainer = document.querySelector(rowContainerElementName);
+      if (rowContainer) {
+        const clearRowButton = rowContainer.querySelector('button');
+        if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
+          clearRowButton.click();
+            const startTime = Date.now();
+            while (document.querySelector(rowContainerElementName) && (Date.now() - startTime) < 30000) {
+              await awaitTimeout(500); // Check every 500ms
+            }
+        }
+      }
 
-//       // Scroll the page down
-//       window.scrollBy(0, window.innerHeight);
+      // Scroll the page down
+      window.scrollBy(0, window.innerHeight);
 
-//       // Check if we can't scroll anymore
-//       const atBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 100; // Add a buffer
-//       if (atBottom) { // Check if we are at the bottom
-//         let noMovementCount = 0;
-//         for (let i = 0; i < 5; i++) { // Try scrolling several times
-//           const previousScrollY = window.scrollY;
-//           window.scrollBy(0, 100); // Attempt to scroll slightly
-//           await awaitTimeout(500); // Wait to see if there's any movement
-//           const newScrollY = window.scrollY;
-//           if (previousScrollY === newScrollY) { // No movement detected
-//         noMovementCount++;
-//           } else {
-//         noMovementCount = 0; // Reset if movement is detected
-//           }
+      const currentCount = document.querySelectorAll("ytd-video-renderer").length;
 
-//           const spinnerVisible = document.querySelector('tp-yt-paper-spinner-lite[active]') !== null; // Check if spinner is visible
-//           if (noMovementCount >= 3 && !spinnerVisible) { // Confirm no movement and spinner is not visible
-//         console.log('We are at the bottom of the page and spinner is not visible');
-//         clearInterval(scrollInterval);
-//         break;
-//           }
-//         }
+      if (currentCount !== previousCount) {
+        previousCount = currentCount;
+        unchangedIterations = 0; // Reset the counter if the count changes
+      } else {
+        unchangedIterations++;
+        if (unchangedIterations >= 30) {
+          clearInterval(scrollInterval); // Stop the interval after 60 unchanged iterations
+        }
+      }
+    }, 1000);
+  };
 
-//           clearInterval(scrollInterval);
-//         }
-//       }
-//     }, 1000);
-//   };
+  scrollAndClearShorts();
+}
 
-//   scrollAndClearShorts();
-// }
+function waitForActionsRenderer() {
+  const checkInterval = setInterval(() => {
+    const actionsRenderer = document.querySelector('ytd-browse-feed-actions-renderer');
+    if (actionsRenderer) {
+      clearInterval(checkInterval);
+      insertDeleteAllButton(actionsRenderer);
+    }
+  }, 500);
+}
 
-// function waitForActionsRenderer() {
-//   const checkInterval = setInterval(() => {
-//     const actionsRenderer = document.querySelector('ytd-browse-feed-actions-renderer');
-//     if (actionsRenderer) {
-//       clearInterval(checkInterval);
-//       insertDeleteAllButton(actionsRenderer);
-//     }
-//   }, 500);
-// }
+function insertDeleteAllButton(actionsRenderer) {
+  const deleteAllButton = document.createElement('button');
+  deleteAllButton.textContent = 'Delete All YouTube Shorts';
+  deleteAllButton.style.background = '#ff4d4f';
+  deleteAllButton.style.color = '#fff';
+  deleteAllButton.style.border = 'none';
+  deleteAllButton.style.borderRadius = '4px';
+  deleteAllButton.style.padding = '8px 16px';
+  deleteAllButton.style.margin = '8px 0';
+  deleteAllButton.style.cursor = 'pointer';
+  deleteAllButton.style.fontWeight = 'bold';
+  deleteAllButton.style.fontSize = '14px';
+  deleteAllButton.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
+  deleteAllButton.style.transition = 'background 0.2s';
+  deleteAllButton.onmouseover = () => deleteAllButton.style.background = '#d9363e';
+  deleteAllButton.onmouseout = () => deleteAllButton.style.background = '#ff4d4f';
+  deleteAllButton.addEventListener('click', deleteAll);
 
-// function insertDeleteAllButton(actionsRenderer) {
-//   const deleteAllButton = document.createElement('button');
-//   deleteAllButton.textContent = 'Delete All YouTube Shorts';
-//   deleteAllButton.style.background = '#ff4d4f';
-//   deleteAllButton.style.color = '#fff';
-//   deleteAllButton.style.border = 'none';
-//   deleteAllButton.style.borderRadius = '4px';
-//   deleteAllButton.style.padding = '8px 16px';
-//   deleteAllButton.style.margin = '8px 0';
-//   deleteAllButton.style.cursor = 'pointer';
-//   deleteAllButton.style.fontWeight = 'bold';
-//   deleteAllButton.style.fontSize = '14px';
-//   deleteAllButton.style.boxShadow = '0 2px 6px rgba(0,0,0,0.08)';
-//   deleteAllButton.style.transition = 'background 0.2s';
-//   deleteAllButton.onmouseover = () => deleteAllButton.style.background = '#d9363e';
-//   deleteAllButton.onmouseout = () => deleteAllButton.style.background = '#ff4d4f';
-//   deleteAllButton.addEventListener('click', deleteAll);
+  actionsRenderer.appendChild(deleteAllButton);
+}
 
-//   actionsRenderer.appendChild(deleteAllButton);
-// }
-
-// waitForActionsRenderer();
+waitForActionsRenderer();
 
 function createDeletedOverlay(targetElement) {
   // Create the overlay div
@@ -245,11 +233,6 @@ async function handleClick(event) {
     }
     const nextButtonShape = closestRowContainer.querySelector('#right-arrow yt-button-shape');
     if (nextButtonShape) {
-      // const stillVisibleRowElements = closestRowContainer.querySelectorAll(rowItemElementName).filter(visibleItemFilter);
-      // if(stillVisibleRowElements.length > 0) {
-      //   clearRowSegment();
-      //   return;
-      // }
       const firstButton = nextButtonShape.querySelector('button');
       if (firstButton) {
         firstButton.click();

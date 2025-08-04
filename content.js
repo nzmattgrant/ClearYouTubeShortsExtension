@@ -10,14 +10,54 @@ const buttonPlaceholderClassSelector = '.' + buttonPlaceholderClass;
 const shelfRowHeaderSelector = 'h2.style-scope.' + rowContainerElementName;
 const allDropDownButtonsSelector = `${rowElementName} ${dropDownButtonClassSelector}`;
 const removeButtonSelector = '.yt-core-attributed-string';
-
+const deleteAllButtonClass = 'delete-all-youtube-shorts-button';
+const deleteAllButtonSelector = `.${deleteAllButtonClass}`;
 
 function deleteAll() {
   const scrollAndClearShorts = async () => {
     let previousCount = 0;
     let unchangedIterations = 0;
     let previousScrollY = window.scrollY;
-    const scrollInterval = setInterval(async () => {
+    const deleteAllButton = document.querySelector(deleteAllButtonSelector);
+    let spinner = null;
+    if (deleteAllButton) {
+
+      // Create a spinner element
+      spinner = document.createElement('div');
+      spinner.classList.add('spinner');
+      spinner.style.width = '24px';
+      spinner.style.height = '24px';
+      spinner.style.border = '4px solid #f3f3f3';
+      spinner.style.borderTop = '4px solid #3498db';
+      spinner.style.borderRadius = '50%';
+      spinner.style.animation = 'spin 1s linear infinite';
+      spinner.style.margin = '0 auto';
+
+      // Insert the spinner after the deleteAllButton
+      deleteAllButton.parentNode.insertBefore(spinner, deleteAllButton.nextSibling);
+
+      // Add keyframes for spinner animation
+      const styleSheet = document.styleSheets[0];
+      styleSheet.insertRule(`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      `, styleSheet.cssRules.length);
+
+      deleteAllButton.parentNode.removeChild(deleteAllButton);
+    }
+    let scrollInterval = null;
+    const resetButton = () => {
+      if (spinner && deleteAllButton) {
+              spinner.parentNode.insertBefore(deleteAllButton, spinner);
+              spinner.parentNode.removeChild(spinner);
+            }
+            
+          clearInterval(scrollInterval);
+    };
+
+    scrollInterval = setInterval(async () => {
       const rowContainer = document.querySelector(rowContainerElementName);
       if (rowContainer) {
         const clearRowButton = rowContainer.querySelector('button');
@@ -39,7 +79,7 @@ function deleteAll() {
 
       const scrolled = window.scrollY !== previousScrollY;
       if (window.scrollY < previousScrollY) {
-        clearInterval(scrollInterval);
+        resetButton();
         return;
       }
       if (scrolled) {
@@ -53,7 +93,8 @@ function deleteAll() {
         // If no scroll and no new count, increment iterations
         unchangedIterations++;
         if (unchangedIterations >= 10) {
-          clearInterval(scrollInterval);
+            // Remove the spinner and add the button back
+            resetButton();
         }
       }
     }, 1000);
@@ -75,6 +116,7 @@ function waitForActionsRenderer() {
 function insertDeleteAllButton(actionsRenderer) {
   const deleteAllButton = document.createElement('button');
   deleteAllButton.textContent = 'Delete All YouTube Shorts (beta)';
+  deleteAllButton.classList.add(deleteAllButtonClass);
   deleteAllButton.style.background = '#ff4d4f';
   deleteAllButton.style.color = '#fff';
   deleteAllButton.style.border = 'none';

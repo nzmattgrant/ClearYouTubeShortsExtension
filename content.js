@@ -61,6 +61,8 @@ function deleteAll() {
     scrollInterval = setInterval(async () => {
       const rowContainer = document.querySelector(rowContainerElementName);
       if (rowContainer) {
+        rowContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        await awaitTimeout(500);
         const clearRowButton = rowContainer.querySelector('button');
         if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
           clearRowButton.click();

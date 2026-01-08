@@ -37,13 +37,14 @@ function deleteAll() {
       deleteAllButton.parentNode.insertBefore(spinner, deleteAllButton.nextSibling);
 
       // Add keyframes for spinner animation
-      const styleSheet = document.styleSheets[0];
-      styleSheet.insertRule(`
+      const style = document.createElement('style');
+      style.textContent = `
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
-      `, styleSheet.cssRules.length);
+      `;
+      document.head.appendChild(style);
 
       deleteAllButton.parentNode.removeChild(deleteAllButton);
     }
@@ -71,6 +72,7 @@ function deleteAll() {
       }
 
       // Scroll the page down
+      //await awaitTimeout(2000);
       window.scrollBy(0, window.innerHeight);
 
       const currentCount = document.querySelectorAll("ytd-video-renderer").length;

@@ -18,10 +18,13 @@ function deleteAll() {
     let previousCount = 0;
     let unchangedIterations = 0;
     let previousScrollY = window.scrollY;
+    
+    // We use a flag to control the loop instead of setInterval ID
+    let isRunning = true;
+
     const deleteAllButton = document.querySelector(deleteAllButtonSelector);
     let spinner = null;
     if (deleteAllButton) {
-
       // Create a spinner element
       spinner = document.createElement('div');
       spinner.classList.add('spinner');
@@ -48,60 +51,91 @@ function deleteAll() {
 
       deleteAllButton.parentNode.removeChild(deleteAllButton);
     }
-    let scrollInterval = null;
+
     const resetButton = () => {
+      isRunning = false; // Stop the loop
       if (spinner && deleteAllButton) {
-              spinner.parentNode.insertBefore(deleteAllButton, spinner);
-              spinner.parentNode.removeChild(spinner);
-            }
-            
-          clearInterval(scrollInterval);
+        // Only re-insert if removed
+        if (spinner.parentNode) {
+             spinner.parentNode.insertBefore(deleteAllButton, spinner);
+             spinner.parentNode.removeChild(spinner);
+        }
+      }
     };
 
-    scrollInterval = setInterval(async () => {
-      const rowContainer = document.querySelector(rowContainerElementName);
-      if (rowContainer) {
-        rowContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Use a while loop instead of setInterval for robust sequential execution
+    while (isRunning) {
+      let actionTaken = false;
+
+      // 1. Find a container that HAS the button ready. This prevents selecting loading skeletons.
+      const allContainers = document.querySelectorAll(rowContainerElementName);
+      const targetContainer = Array.from(allContainers).find(container => {
+        const btn = container.querySelector('button');
+        return btn && btn.textContent.trim() === 'Clear row';
+      });
+
+      if (targetContainer) {
+        const clearRowButton = targetContainer.querySelector('button');
+        
+        // Scroll the specific row into view
+        targetContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
         await awaitTimeout(500);
-        const clearRowButton = rowContainer.querySelector('button');
-        if (clearRowButton && clearRowButton.textContent.trim() === 'Clear row') {
-          clearRowButton.click();
-            const startTime = Date.now();
-            while (document.body.contains(rowContainer) && (Date.now() - startTime) < 30000) {
-              await awaitTimeout(500);
-            }
-        }
-      }
-
-      // Scroll the page down
-      //await awaitTimeout(2000);
-      window.scrollBy(0, window.innerHeight);
-
-      const currentCount = document.querySelectorAll("ytd-video-renderer").length;
-      console.log(`Current count of videos: ${currentCount}`);
-      console.log('Scrolling and checking for new videos...');
-
-      const scrolled = window.scrollY !== previousScrollY;
-      if (window.scrollY < previousScrollY) {
-        resetButton();
-        return;
-      }
-      if (scrolled) {
-        // Do nothing if the page scrolled
+        
+        // CRITICAL FIX: Update scroll position tracking immediately so we don't abort
         previousScrollY = window.scrollY;
-      } else if (currentCount !== previousCount) {
-        // If no scroll but count changed, reset iterations and update counts
-        previousCount = currentCount;
-        unchangedIterations = 0;
-      } else {
-        // If no scroll and no new count, increment iterations
-        unchangedIterations++;
-        if (unchangedIterations >= 10) {
-            // Remove the spinner and add the button back
-            resetButton();
+
+        clearRowButton.click();
+        
+        // Mark that we did work, so we don't scroll the page down this iteration
+        actionTaken = true;
+
+        const startTime = Date.now();
+        // Wait for removal, but with a shorter timeout to prevent permanent hanging
+        while (document.body.contains(targetContainer) && (Date.now() - startTime) < 10000) {
+           await awaitTimeout(500);
         }
       }
-    }, 1000);
+
+      // 2. If we didn't delete anything, Scroll the page down to load more
+      if (!actionTaken) {
+        window.scrollBy(0, window.innerHeight);
+        await awaitTimeout(2000); // Allow time for YouTube to load new rows
+
+        const currentCount = document.querySelectorAll("ytd-video-renderer").length;
+        console.log(`Current count of videos: ${currentCount}`);
+        console.log('Scrolling and checking for new videos...');
+
+        const currentScrollY = window.scrollY;
+        
+        // Check for manual user interrupt (scrolling up significantly)
+        // We add a small buffer (10px) to ignore minor browser adjustments
+        if (currentScrollY < previousScrollY - 20) {
+          console.log("User scrolled up, stopping.");
+          resetButton();
+          break;
+        }
+
+        if (currentScrollY > previousScrollY) {
+            // We moved down successfully
+            previousScrollY = currentScrollY;
+            unchangedIterations = 0;
+        } else if (currentCount !== previousCount) {
+             // We didn't move (maybe end of page) but content count changed
+             previousCount = currentCount;
+             unchangedIterations = 0;
+        } else {
+             // No movement, no new content
+             unchangedIterations++;
+             if (unchangedIterations >= 10) {
+                 resetButton();
+                 break;
+             }
+        }
+      } else {
+          // If we took an action, reset the "stuck" counter
+          unchangedIterations = 0;
+      }
+    }
   };
 
   scrollAndClearShorts();

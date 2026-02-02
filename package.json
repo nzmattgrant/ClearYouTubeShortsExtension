@@ -1,0 +1,14 @@
+{
+  "name": "clear-youtube-shorts-extension",
+  "version": "1.0.0",
+  "description": "Helper scripts for Clear YouTube Shorts Extension",
+  "scripts": {
+    "publish": "node publish.js"
+  },
+  "dependencies": {
+    "archiver": "^5.3.0",
+    "chrome-webstore-upload": "^1.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "type": "module"
+}

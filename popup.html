@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 250px;
+      padding: 15px;
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #0f0f0f;
+    }
+    h1 {
+      font-size: 16px;
+      margin-bottom: 15px;
+      text-align: center;
+      color: #333;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    a.button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    /* Donate Button */
+    .donate {
+      background-color: #29abe0; /* Ko-fi color approx */
+      color: white;
+    }
+    .donate:hover {
+      background-color: #2396c7;
+    }
+    /* Email Buttons */
+    .email-btn {
+      background-color: #ffffff;
+      color: #0f0f0f;
+      border: 1px solid #ccc;
+    }
+    .email-btn:hover {
+      background-color: #eee;
+    }
+    .icon {
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Clear YouTube Shorts</h1>
+  <div class="button-container">
+    <a href="https://ko-fi.com/nzmattgrant" target="_blank" class="button donate">
+      <span class="icon">☕</span> Donate on Ko-fi
+    </a>
+    
+    <a href="mailto:clearytshortsfromhistory@gmail.com?subject=Feedback" class="button email-btn">
+      <span class="icon">💭</span> Give Feedback
+    </a>
+
+    <a href="mailto:clearytshortsfromhistory@gmail.com?subject=Feature Request" class="button email-btn">
+      <span class="icon">✨</span> Request Feature
+    </a>
+    
+    <a href="mailto:clearytshortsfromhistory@gmail.com?subject=Complaint" class="button email-btn">
+      <span class="icon">⚠️</span> File Complaint
+    </a>
+  </div>
+</body>
+</html>

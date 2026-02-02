@@ -8,6 +8,14 @@
     "48": "DeleteShortsIcon48.png",
     "16": "DeleteShortsIcon16.png"
   },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "DeleteShortsIcon128.png",
+      "48": "DeleteShortsIcon48.png",
+      "16": "DeleteShortsIcon16.png"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/*"],

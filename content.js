@@ -22,25 +22,79 @@ function deleteAll() {
     // We use a flag to control the loop instead of setInterval ID
     let isRunning = true;
 
-    const deleteAllButton = document.querySelector(deleteAllButtonSelector);
-    let spinner = null;
-    if (deleteAllButton) {
-      // Create a spinner element
-      spinner = document.createElement('div');
-      spinner.classList.add('spinner');
-      spinner.style.width = '24px';
-      spinner.style.height = '24px';
-      spinner.style.border = '4px solid #f3f3f3';
-      spinner.style.borderTop = '4px solid #3498db';
-      spinner.style.borderRadius = '50%';
-      spinner.style.animation = 'spin 1s linear infinite';
-      spinner.style.margin = '0 auto';
+    // Create Modal Overlay
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+    overlay.style.zIndex = '99999';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.backdropFilter = 'blur(5px)';
 
-      // Insert the spinner after the deleteAllButton
-      deleteAllButton.parentNode.insertBefore(spinner, deleteAllButton.nextSibling);
+    // Prevent scrolling while overlay is active
+    const preventDefault = (e) => e.preventDefault();
+    overlay.addEventListener('wheel', preventDefault, { passive: false });
+    overlay.addEventListener('touchmove', preventDefault, { passive: false });
 
-      // Add keyframes for spinner animation
+    // Spinner
+    const spinner = document.createElement('div');
+    spinner.style.width = '60px';
+    spinner.style.height = '60px';
+    spinner.style.border = '6px solid #f3f3f3';
+    spinner.style.borderTop = '6px solid #3498db';
+    spinner.style.borderRadius = '50%';
+    spinner.style.animation = 'spin 1s linear infinite';
+    spinner.style.marginBottom = '20px';
+
+    // Text
+    const text = document.createElement('div');
+    text.textContent = 'Deleting Shorts History...';
+    text.style.color = 'white';
+    text.style.fontSize = '24px';
+    text.style.fontFamily = 'Roboto, Arial, sans-serif';
+    text.style.fontWeight = '500';
+    text.style.marginBottom = '30px';
+
+    // Stop Button
+    const stopButton = document.createElement('button');
+    stopButton.textContent = 'Stop';
+    stopButton.style.padding = '12px 32px';
+    stopButton.style.fontSize = '16px';
+    stopButton.style.fontWeight = 'bold';
+    stopButton.style.color = 'white';
+    stopButton.style.backgroundColor = '#ff4d4f';
+    stopButton.style.border = 'none';
+    stopButton.style.borderRadius = '4px';
+    stopButton.style.cursor = 'pointer';
+    stopButton.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+    
+    stopButton.onmouseover = () => stopButton.style.backgroundColor = '#d9363e';
+    stopButton.onmouseout = () => stopButton.style.backgroundColor = '#ff4d4f';
+
+    const resetButton = () => {
+      isRunning = false; // Stop the loop
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+    };
+
+    stopButton.addEventListener('click', resetButton);
+
+    overlay.appendChild(spinner);
+    overlay.appendChild(text);
+    overlay.appendChild(stopButton);
+    document.body.appendChild(overlay);
+
+    // Add keyframes for spinner animation if needed (check if style already exists to avoid dupes)
+    if (!document.getElementById('cyse-spinner-style')) {
       const style = document.createElement('style');
+      style.id = 'cyse-spinner-style';
       style.textContent = `
       @keyframes spin {
         0% { transform: rotate(0deg); }
@@ -48,21 +102,8 @@ function deleteAll() {
       }
       `;
       document.head.appendChild(style);
-
-      deleteAllButton.parentNode.removeChild(deleteAllButton);
     }
-
-    const resetButton = () => {
-      isRunning = false; // Stop the loop
-      if (spinner && deleteAllButton) {
-        // Only re-insert if removed
-        if (spinner.parentNode) {
-             spinner.parentNode.insertBefore(deleteAllButton, spinner);
-             spinner.parentNode.removeChild(spinner);
-        }
-      }
-    };
-
+    
     // Use a while loop instead of setInterval for robust sequential execution
     while (isRunning) {
       let actionTaken = false;

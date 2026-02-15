@@ -360,8 +360,17 @@ async function handleClick(event) {
       }
       button.click();
       await awaitTimeout(100);
-      const removeButton = Array.from(document.querySelectorAll(removeButtonSelector))
-        .find((e) => e.textContent === 'Remove from watch history');
+      
+      // Look for the menu item containing the specific trash can icon path
+      // This is language-agnostic compared to checking text content
+      const deletePath = "M19 3h-4V2a1 1 0 00-1-1h-4a1 1 0 00-1 1v1H5a2 2 0 00-2 2h18a2 2 0 00-2-2ZM6 19V7H4v12a4 4 0 004 4h8a4 4 0 004-4V7h-2v12a2 2 0 01-2 2H8a2 2 0 01-2-2Zm4-11a1 1 0 00-1 1v8a1 1 0 102 0V9a1 1 0 00-1-1Zm4 0a1 1 0 00-1 1v8a1 1 0 002 0V9a1 1 0 00-1-1Z";
+      
+      const removeButton = Array.from(document.querySelectorAll('yt-list-item-view-model'))
+        .find(item => {
+            const path = item.querySelector('path');
+            return path && path.getAttribute('d') === deletePath;
+        });
+
       if (removeButton) {
         removeButton.click();
         await awaitTimeout(10);
